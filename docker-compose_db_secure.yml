@@ -1,0 +1,56 @@
+version: "3.8"
+services:
+  db:
+    image: postgres
+    container_name: local_pgdb
+    restart: always
+    # ports:
+      # - "54320:5432"
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: 1234
+    volumes:
+      - local_pgdata:/var/lib/postgresql/data
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin4_container
+    restart: always
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: mac@mail.com
+      PGADMIN_DEFAULT_PASSWORD: 1234
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+  pgbackups:
+    image: prodrigestivill/postgres-backup-local
+
+    # container_name: pg_backup
+    restart: always
+    # user: postgres:postgres # Optional: see below
+    volumes:
+      - ./pgbackups:/backups
+    links:
+      - db
+    depends_on:
+      - db
+    ports:
+      - "5052:8080"
+    environment:
+      - POSTGRES_HOST=db
+      - POSTGRES_DB=test
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=1234
+    #  - POSTGRES_PASSWORD_FILE=/run/secrets/db_password <-- alternative for POSTGRES_PASSWORD (to use with docker secrets)
+      - POSTGRES_EXTRA_OPTS=-Z6 --schema=public --blobs
+      - SCHEDULE=@every 0h01m00s
+      # @daily
+      - BACKUP_KEEP_DAYS=7
+      - BACKUP_KEEP_WEEKS=4
+      - BACKUP_KEEP_MONTHS=6
+      - HEALTHCHECK_PORT=8080
+
+volumes:
+  local_pgdata:
+  pgadmin-data:
+  pgbackups:
