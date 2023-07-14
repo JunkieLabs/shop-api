@@ -20,10 +20,13 @@ services:
     container_name: medusa-server
     depends_on:
       - db
+      - meilisearch
     environment:
       DATABASE_URL: postgres://user:1234@db:5432/medusa-db-8z24y
       REDIS_URL: redis://localhost:6379
       # NODE_ENV: development
+      MEILISEARCH_HOST: http://meilisearch:7700
+      MEILISEARCH_API_KEY: masterKey
       JWT_SECRET: some_jwt_secret
       COOKIE_SECRET: some_cookie_secret
       PORT: 9000  
@@ -69,6 +72,28 @@ services:
       - BACKUP_KEEP_MONTHS=6
       - HEALTHCHECK_PORT=8080
 
+  meilisearch:
+    container_name: meilisearch
+    image: getmeili/meilisearch:v0.25.2
+    environment:
+      - http_proxy
+      - https_proxy
+      - MEILI_MASTER_KEY=${MEILI_MASTER_KEY:-masterKey}
+      - MEILI_NO_ANALYTICS=${MEILI_NO_ANALYTICS:-true}
+      - MEILI_ENV=${MEILI_ENV:-development}
+      - MEILI_LOG_LEVEL
+      - MEILI_DB_PATH=${MEILI_DB_PATH:-/data.ms}
+    ports:
+      - ${MEILI_PORT:-7700}:7700
+    networks:
+      - meilisearch
+    volumes:
+      - ./data.ms:/data.ms
+    restart: unless-stopped
+
+networks:
+  meilisearch:
+    driver: bridge
 volumes:
   local_pgdata:
   pgadmin-data:
