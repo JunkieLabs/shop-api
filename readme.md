@@ -20,3 +20,8 @@
     docker-compose stop
 
 ```
+
+## login in admin
+
+-  email: admin@medusa-test.com 
+-  password: supersecret
