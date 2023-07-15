@@ -42,51 +42,16 @@ const plugins = [
       upload_dir: "uploads",
     },
   },
-  // To enable the admin plugin, uncomment the following lines and run `yarn add @medusajs/admin`
   {
     resolve: "@medusajs/admin",
     /** @type {import('@medusajs/admin').PluginOptions} */
     options: {
       autoRebuild: true,
+      develop: {
+        open: process.env.OPEN_BROWSER !== "false",
+      },
     },
   },
-  // ...
-  {
-    resolve: `medusa-plugin-meilisearch`,
-    options: {
-      // config object passed when creating an instance
-      // of the MeiliSearch client
-      config: {
-        host: process.env.MEILISEARCH_HOST,
-        apiKey: process.env.MEILISEARCH_API_KEY,
-      },
-      settings: {
-        // index settings...
-
-        products: {
-          indexSettings: {
-            searchableAttributes: [
-              "title", 
-              "description",
-              "variant_sku",
-            ],
-            displayedAttributes: [
-              "title", 
-              "description", 
-              "variant_sku", 
-              "thumbnail", 
-              "handle",
-            ],
-          },
-          primaryKey: "id",
-          // transformer: (product) => ({
-          //   id: product.id, 
-          //   // other attributes...
-          // }),
-        },
-      },
-    },
-  }
 ];
 
 const modules = {
