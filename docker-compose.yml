@@ -4,13 +4,15 @@ services:
     image: postgres
     container_name: local_pgdb
     restart: always
-    ports:
-      - "54320:5432"
+    # ports:
+    #   - "54320:5432"
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: 1234
     volumes:
       - local_pgdata:/var/lib/postgresql/data
+    networks:
+      - secure_network
 
   backend:
     build:
@@ -32,45 +34,74 @@ services:
       PORT: 9000  
     ports:
       - "9000:9000"
+    networks:
+      - secure_network
   
-  pgadmin:
-    image: dpage/pgadmin4
-    container_name: pgadmin4_container
-    restart: always
-    ports:
-      - "5050:80"
-    environment:
-      PGADMIN_DEFAULT_EMAIL: mac@mail.com
-      PGADMIN_DEFAULT_PASSWORD: 1234
-    volumes:
-      - pgadmin-data:/var/lib/pgadmin
-  pgbackups:
-    image: prodrigestivill/postgres-backup-local
+  # pgadmin:
+  #   image: dpage/pgadmin4
+  #   container_name: pgadmin4_container
+  #   restart: always
+  #   ports:
+  #     - "5050:80"
+  #   environment:
+  #     PGADMIN_DEFAULT_EMAIL: mac@mail.com
+  #     PGADMIN_DEFAULT_PASSWORD: 1234
+  #   volumes:
+  #     - pgadmin-data:/var/lib/pgadmin
 
-    # container_name: pg_backup
-    restart: always
-    # user: postgres:postgres # Optional: see below
-    volumes:
-      - ./pgbackups:/backups
-    links:
-      - db
-    depends_on:
-      - db
+  ssh_server:
+    build:
+      context: ./ssh_server
     ports:
-      - "5052:8080"
-    environment:
-      - POSTGRES_HOST=db
-      - POSTGRES_DB=test
-      - POSTGRES_USER=user
-      - POSTGRES_PASSWORD=1234
-    #  - POSTGRES_PASSWORD_FILE=/run/secrets/db_password <-- alternative for POSTGRES_PASSWORD (to use with docker secrets)
-      - POSTGRES_EXTRA_OPTS=-Z6 --schema=public --blobs
-      - SCHEDULE=@every 0h01m00s
-      # @daily
-      - BACKUP_KEEP_DAYS=7
-      - BACKUP_KEEP_WEEKS=4
-      - BACKUP_KEEP_MONTHS=6
-      - HEALTHCHECK_PORT=8080
+      - "2222:22"
+    volumes:
+      - ./ssh_server/authorized_keys:/home/user/.ssh/authorized_keys
+    command: /usr/sbin/sshd -D
+    networks:
+      - secure_network
+
+  # ssh-tunnel:
+  #   image: alpine:latest
+  #   command: sh -c "apk add --update openssh-client && ssh -N ${REMOTE_USER}@${REMOTE_IP} -L 0.0.0.0:54321:127.0.0.1:5432 "
+  #   # The command above installs the SSH client, creates an SSH tunnel, and keeps the tunnel active.
+  #   # Replace "user" with your SSH username, and "your_remote_server_ip" with the server's IP address.
+  #   environment:
+  #     - REMOTE_IP=${REMOTE_IP}
+  #     - REMOTE_USER=${REMOTE_USER}
+  #   depends_on:
+  #     - db
+  #   networks:
+  #     - secure_network
+
+  # pgbackups:
+  #   image: prodrigestivill/postgres-backup-local
+
+  #   # container_name: pg_backup
+  #   restart: always
+  #   # user: postgres:postgres # Optional: see below
+  #   volumes:
+  #     - ./pgbackups:/backups
+  #   links:
+  #     - db
+  #   depends_on:
+  #     - db
+  #   ports:
+  #     - "5052:8080"
+  #   environment:
+  #     - POSTGRES_HOST=db
+  #     - POSTGRES_DB=test
+  #     - POSTGRES_USER=user
+  #     - POSTGRES_PASSWORD=1234
+  #   #  - POSTGRES_PASSWORD_FILE=/run/secrets/db_password <-- alternative for POSTGRES_PASSWORD (to use with docker secrets)
+  #     - POSTGRES_EXTRA_OPTS=-Z6 --schema=public --blobs
+  #     - SCHEDULE=@every 0h01m00s
+  #     # @daily
+  #     - BACKUP_KEEP_DAYS=7
+  #     - BACKUP_KEEP_WEEKS=4
+  #     - BACKUP_KEEP_MONTHS=6
+  #     - HEALTHCHECK_PORT=8080
+  #   networks:
+  #     - secure_network
 
   meilisearch:
     container_name: meilisearch
@@ -86,14 +117,17 @@ services:
     ports:
       - ${MEILI_PORT:-7700}:7700
     networks:
-      - meilisearch
+      - secure_network
     volumes:
       - ./data.ms:/data.ms
     restart: unless-stopped
 
 networks:
-  meilisearch:
+
+  secure_network:
     driver: bridge
+  # meilisearch:
+  #   driver: bridge
 volumes:
   local_pgdata:
   pgadmin-data:

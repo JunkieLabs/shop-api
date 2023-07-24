@@ -11,6 +11,28 @@ services:
       POSTGRES_PASSWORD: 1234
     volumes:
       - local_pgdata:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: ./my-medusa-backend
+      dockerfile: Dockerfile
+    image: backend:test
+    container_name: medusa-server
+    depends_on:
+      - db
+      - meilisearch
+    environment:
+      DATABASE_URL: postgres://user:1234@db:5432/medusa-db-8z24y
+      REDIS_URL: redis://localhost:6379
+      # NODE_ENV: development
+      MEILISEARCH_HOST: http://meilisearch:7700
+      MEILISEARCH_API_KEY: masterKey
+      JWT_SECRET: some_jwt_secret
+      COOKIE_SECRET: some_cookie_secret
+      PORT: 9000  
+    ports:
+      - "9000:9000"
+  
   pgadmin:
     image: dpage/pgadmin4
     container_name: pgadmin4_container
@@ -22,7 +44,57 @@ services:
       PGADMIN_DEFAULT_PASSWORD: 1234
     volumes:
       - pgadmin-data:/var/lib/pgadmin
+  pgbackups:
+    image: prodrigestivill/postgres-backup-local
 
+    # container_name: pg_backup
+    restart: always
+    # user: postgres:postgres # Optional: see below
+    volumes:
+      - ./pgbackups:/backups
+    links:
+      - db
+    depends_on:
+      - db
+    ports:
+      - "5052:8080"
+    environment:
+      - POSTGRES_HOST=db
+      - POSTGRES_DB=test
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=1234
+    #  - POSTGRES_PASSWORD_FILE=/run/secrets/db_password <-- alternative for POSTGRES_PASSWORD (to use with docker secrets)
+      - POSTGRES_EXTRA_OPTS=-Z6 --schema=public --blobs
+      - SCHEDULE=@every 0h01m00s
+      # @daily
+      - BACKUP_KEEP_DAYS=7
+      - BACKUP_KEEP_WEEKS=4
+      - BACKUP_KEEP_MONTHS=6
+      - HEALTHCHECK_PORT=8080
+
+  meilisearch:
+    container_name: meilisearch
+    image: getmeili/meilisearch:v0.25.2
+    environment:
+      - http_proxy
+      - https_proxy
+      - MEILI_MASTER_KEY=${MEILI_MASTER_KEY:-masterKey}
+      - MEILI_NO_ANALYTICS=${MEILI_NO_ANALYTICS:-true}
+      - MEILI_ENV=${MEILI_ENV:-development}
+      - MEILI_LOG_LEVEL
+      - MEILI_DB_PATH=${MEILI_DB_PATH:-/data.ms}
+    ports:
+      - ${MEILI_PORT:-7700}:7700
+    networks:
+      - meilisearch
+    volumes:
+      - ./data.ms:/data.ms
+    restart: unless-stopped
+
+networks:
+  meilisearch:
+    driver: bridge
 volumes:
   local_pgdata:
   pgadmin-data:
+  pgbackups:
