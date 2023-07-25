@@ -20,7 +20,8 @@ services:
       dockerfile: Dockerfile
     image: backend:tes
     container_name: medusa-server
-    mem_limit: 500m
+    mem_limit: 600m
+    cpus: 0.5
     depends_on:
       - db
       - meilisearch
