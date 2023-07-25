@@ -4,8 +4,8 @@ services:
     image: postgres
     container_name: local_pgdb
     restart: always
-    # ports:
-    #   - "54320:5432"
+    ports:
+      - "54320:5432"
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: 1234
@@ -36,8 +36,8 @@ services:
       JWT_SECRET: some_jwt_secret
       COOKIE_SECRET: some_cookie_secret
       PORT: 9000  
-    # ports:
-    #   - "9000:9000"
+    ports:
+      - "9000:9000"
     networks:
       - secure_network
   

@@ -1,8 +1,12 @@
 #!/bin/bash
 
+# medusa seed -f ./data/seed.json
+
+# npx @medusajs/medusa-cli@latest seed -f ./data/seed.json
+
+
 medusa migrations run
 
-# medusa seed -f ./data/seed.json
-npm run seed
+# npm run seed
 
 medusa $1

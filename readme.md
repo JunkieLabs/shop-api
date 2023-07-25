@@ -23,5 +23,5 @@
 
 ## login in admin
 
--  email: admin@medusa-test.com 
--  password: supersecret
+-  --: admin@medusa-test.com 
+-  --: supersecret
