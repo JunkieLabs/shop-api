@@ -23,6 +23,9 @@ services:
     depends_on:
       - db
       - meilisearch
+
+    volumes:
+      - node_modules:/usr/src/app/node_modules
     environment:
       DATABASE_URL: postgres://user:1234@db:5432/medusa-db-8z24y
       REDIS_URL: redis://localhost:6379
@@ -32,8 +35,8 @@ services:
       JWT_SECRET: some_jwt_secret
       COOKIE_SECRET: some_cookie_secret
       PORT: 9000  
-    ports:
-      - "9000:9000"
+    # ports:
+    #   - "9000:9000"
     networks:
       - secure_network
   
@@ -122,6 +125,41 @@ services:
       - ./data.ms:/data.ms
     restart: unless-stopped
 
+
+ #####################
+  ### Nginx Proxy
+  #####################
+  proxy:
+    restart: unless-stopped
+    image: nginx
+    ports:
+      - 80:${NGINX_PORT}
+      - 443:443
+      # - 443:443
+    depends_on:
+      - backend
+    volumes:
+      - ./nginx/conf/:/etc/nginx/conf.d/:rw
+      - ./certbot/www:/var/www/certbot/:ro
+      - ./certbot/conf/:/etc/nginx/ssl/:ro
+
+    networks:
+      - secure_network
+      # node_network:
+      #   aliases:
+      #     - localhost
+
+
+  # certbot:
+  #   image: certbot/certbot
+  #   container_name: certbot
+  #   volumes: 
+  #     - ./certbot/conf:/etc/letsencrypt:rw
+  #     - ./certbot/www:/var/www/certbot:rw
+  #   command: certonly --webroot -w /var/www/certbot --force-renewal --email junkielabs.dev@gmail.com -d shoptest.junkielabs.in --agree-tos
+
+
+
 networks:
 
   secure_network:
@@ -132,3 +170,5 @@ volumes:
   local_pgdata:
   pgadmin-data:
   pgbackups:
+  node_modules:
+
