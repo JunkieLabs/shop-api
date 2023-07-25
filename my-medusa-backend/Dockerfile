@@ -16,7 +16,8 @@ RUN npm install -g @medusajs/medusa-cli@latest
 
 # RUN npm install --loglevel=error
 
-RUN npm install --legacy-peer-deps --loglevel=error
+RUN npm install --legacy-peer-deps --force
+# --loglevel=error
 
 COPY . .
 
