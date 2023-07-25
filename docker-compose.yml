@@ -18,8 +18,9 @@ services:
     build:
       context: ./my-medusa-backend
       dockerfile: Dockerfile
-    image: backend:test
+    image: backend:tes
     container_name: medusa-server
+    mem_limit: 300m
     depends_on:
       - db
       - meilisearch
