@@ -15,11 +15,13 @@ RUN npm install -g npm@latest
 RUN npm install -g @medusajs/medusa-cli@latest
 
 # RUN npm install --loglevel=error
-
-RUN npm install  --force --loglevel=error
 # --loglevel=error
 
 COPY . .
+
+
+
+RUN npm install  --force --loglevel=error
 
 RUN chmod +x develop.sh
 
