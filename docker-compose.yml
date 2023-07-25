@@ -4,8 +4,8 @@ services:
     image: postgres
     container_name: local_pgdb
     restart: always
-    ports:
-      - "54320:5432"
+    # ports:
+      # - "54320:5432"
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: 1234
@@ -152,13 +152,13 @@ services:
       #     - localhost
 
 
-  # certbot:
-  #   image: certbot/certbot
-  #   container_name: certbot
-  #   volumes: 
-  #     - ./certbot/conf:/etc/letsencrypt:rw
-  #     - ./certbot/www:/var/www/certbot:rw
-  #   command: certonly --webroot -w /var/www/certbot --force-renewal --email junkielabs.dev@gmail.com -d shoptest.junkielabs.in --agree-tos
+  certbot:
+    image: certbot/certbot
+    container_name: certbot
+    volumes: 
+      - ./certbot/conf:/etc/letsencrypt:rw
+      - ./certbot/www:/var/www/certbot:rw
+    command: certonly --webroot -w /var/www/certbot --force-renewal --email junkielabs.dev@gmail.com -d shoptest.junkielabs.in --agree-tos
 
 
 
