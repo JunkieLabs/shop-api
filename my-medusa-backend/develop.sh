@@ -2,6 +2,6 @@
 
 medusa migrations run
 
-medusa run seed
+medusa seed -f ./data/seed.json
 
 medusa $1
