@@ -4,7 +4,6 @@
 
 # npx @medusajs/medusa-cli@latest seed -f ./data/seed.json
 
-
 medusa migrations run
 
 # npm run seed

@@ -16,7 +16,7 @@ RUN npm install -g @medusajs/medusa-cli@latest
 
 # RUN npm install --loglevel=error
 
-RUN npm install --legacy-peer-deps --force
+RUN npm install  --force --loglevel=error
 # --loglevel=error
 
 COPY . .
@@ -24,4 +24,4 @@ COPY . .
 RUN chmod +x develop.sh
 
 
-ENTRYPOINT ["./develop.sh", "develop"]
+ENTRYPOINT ["./develop.sh", "start"]
