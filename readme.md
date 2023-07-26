@@ -21,7 +21,3 @@
 
 ```
 
-## login in admin
-
--  --: admin@medusa-test.com 
--  --: supersecret
